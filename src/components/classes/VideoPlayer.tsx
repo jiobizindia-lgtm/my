@@ -50,6 +50,17 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
   const [customHeight, setCustomHeight] = useState<number | null>(null);
   const [showSizeControls, setShowSizeControls] = useState(false);
   const isYouTube = src.includes("youtube.com") || src.includes("youtu.be") || src.startsWith("yt:");
+  const isArchive = src.includes("archive.org");
+
+const archiveId = src.includes("/details/")
+  ? src.split("/details/")[1].split("/")[0]
+  : src.split("/stream/")[1]?.split("/")[0];
+
+const archiveSrc = archiveId
+  ? `https://archive.org/embed/${archiveId}`
+  : src;
+
+
 
 
   const hideControlsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -167,7 +178,7 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
   };
 
  const togglePiP = async () => {
-  if (isYouTube) return; // <-- add this line
+  if (isYouTube || isArchive) return; // <-- add this line
   const video = videoRef.current;
   if (!video) return;
   if (document.pictureInPictureElement) {
@@ -199,31 +210,39 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
     onMouseLeave={() => setIsHovering(false)}
     onMouseMove={() => setShowControls(true)}
   >
-    {/* Video / YouTube */}
-    {isYouTube ? (
-      <iframe
-        src={
-          src.startsWith("yt:")
-            ? `https://www.youtube.com/embed/${src.replace("yt:", "")}`
-            : src.replace("watch?v=", "embed/").replace("/live/", "/embed/")
-        }
-        className="w-full h-full"
-        allow="autoplay; encrypted-media; picture-in-picture"
-        allowFullScreen
-      />
-    ) : (
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        className="w-full h-full object-contain cursor-pointer"
-        onClick={togglePlay}
-        playsInline
-      />
-    )}
+    {/* Video, archive / YouTube */}
+    {isArchive ? (
+  <iframe
+    src={archiveSrc}
+    className="w-full h-full"
+    allow="autoplay; fullscreen; encrypted-media"
+    allowFullScreen
+  />
+) : isYouTube ? (
+  <iframe
+    src={
+      src.startsWith("yt:")
+        ? `https://www.youtube.com/embed/${src.replace("yt:", "")}`
+        : src.replace("watch?v=", "embed/").replace("/live/", "/embed/")
+    }
+    className="w-full h-full"
+    allow="autoplay; encrypted-media; picture-in-picture"
+    allowFullScreen
+  />
+) : (
+  <video
+    ref={videoRef}
+    src={src}
+    poster={poster}
+    className="w-full h-full object-contain cursor-pointer"
+    onClick={togglePlay}
+    playsInline
+  />
+)}
+
 
     {/* Play Overlay */}
-    {!isYouTube && !isPlaying && (
+    {!isYouTube && !isArchive && !isPlaying && (
       <div
         className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
         onClick={togglePlay}
@@ -235,7 +254,7 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
     )}
 
     {/* Controls */}
-    {!isYouTube && (
+    {!isYouTube && !isArchive && (
       <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-4">
         <div className="mb-3">
           <Slider
