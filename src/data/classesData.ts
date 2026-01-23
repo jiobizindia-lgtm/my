@@ -462,7 +462,7 @@ export const classes: ClassItem[] = [
   {
     id: "ytlcmhcf-1",
     subtopicId: "yt-lcm&hcf",
-    title: "LCM & HCF Shortcuts By Abhinay Sharma
+    title: "LCM & HCF Shortcuts By Abhinay Sharma",
     teacher: "Abhinay Sharma",
     thumbnail: "/images/Abhinay_sir.jpg",
     videoUrl: "https://www.youtube.com/live/SPTyAhOtVGg?si=kK3Jf7Pg47h95TOZ",
