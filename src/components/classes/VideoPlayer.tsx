@@ -49,6 +49,8 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
   const [customWidth, setCustomWidth] = useState<number | null>(null);
   const [customHeight, setCustomHeight] = useState<number | null>(null);
   const [showSizeControls, setShowSizeControls] = useState(false);
+  const isYouTube = src.includes("youtube.com") || src.includes("youtu.be") || src.startsWith("yt:");
+
 
   const hideControlsTimeout = useRef<NodeJS.Timeout>();
 
@@ -194,14 +196,28 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
       onMouseLeave={() => setIsHovering(false)}
       onMouseMove={() => setShowControls(true)}
     >
-      <video
-        ref={videoRef}
-        src={src}
-        poster={poster}
-        className="w-full h-full object-contain cursor-pointer"
-        onClick={togglePlay}
-        playsInline
-      />
+      {isYouTube ? (
+  <iframe
+    src={
+      src.startsWith("yt:")
+        ? `https://www.youtube.com/embed/${src.replace("yt:", "")}`
+        : src.replace("watch?v=", "embed/").replace("/live/", "/embed/")
+    }
+    className="w-full h-full"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowFullScreen
+  />
+) : (
+  <video
+    ref={videoRef}
+    src={src}
+    poster={poster}
+    className="w-full h-full object-contain cursor-pointer"
+    onClick={togglePlay}
+    playsInline
+  />
+)}
+
 
       {/* Play/Pause Overlay */}
       {!isPlaying && (
