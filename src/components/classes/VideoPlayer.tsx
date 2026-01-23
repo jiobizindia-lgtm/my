@@ -52,7 +52,8 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
   const isYouTube = src.includes("youtube.com") || src.includes("youtu.be") || src.startsWith("yt:");
 
 
-  const hideControlsTimeout = useRef<NodeJS.Timeout>();
+  const hideControlsTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   useEffect(() => {
     const video = videoRef.current;
@@ -165,15 +166,17 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
     video.currentTime = Math.max(0, Math.min(video.currentTime + seconds, duration));
   };
 
-  const togglePiP = async () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture();
-    } else {
-      await video.requestPictureInPicture();
-    }
-  };
+ const togglePiP = async () => {
+  if (isYouTube) return; // <-- add this line
+  const video = videoRef.current;
+  if (!video) return;
+  if (document.pictureInPictureElement) {
+    await document.exitPictureInPicture();
+  } else {
+    await video.requestPictureInPicture();
+  }
+};
+
 
   const progress = duration ? (currentTime / duration) * 100 : 0;
 
@@ -196,7 +199,7 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
       onMouseLeave={() => setIsHovering(false)}
       onMouseMove={() => setShowControls(true)}
     >
-      {isYouTube ? (
+{isYouTube ? (
   <iframe
     src={
       src.startsWith("yt:")
@@ -204,7 +207,7 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
         : src.replace("watch?v=", "embed/").replace("/live/", "/embed/")
     }
     className="w-full h-full"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allow="autoplay; encrypted-media; picture-in-picture"
     allowFullScreen
   />
 ) : (
@@ -219,35 +222,35 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
 )}
 
 
-      {/* Play/Pause Overlay */}
-      {!isPlaying && (
-        <div
-          className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
-          onClick={togglePlay}
-        >
-          <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center hover:bg-primary transition-colors">
-            <Play className="h-10 w-10 text-primary-foreground ml-1" />
-          </div>
-        </div>
-      )}
 
-      {/* Controls */}
-      <div
-        className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 transition-opacity duration-300 ${
-          showControls ? "opacity-100" : "opacity-0"
-        }`}
-      >
-        {/* Progress Bar */}
-        <div className="mb-3">
-          <Slider
-            value={[currentTime]}
-            max={duration || 100}
-            step={0.1}
-            onValueChange={handleSeek}
-            className="cursor-pointer [&_[role=slider]]:h-3 [&_[role=slider]]:w-3 [&_[role=slider]]:bg-primary [&_.bg-primary]:bg-primary"
-          />
-        </div>
+      {/* Play/Pause Overlay (ONLY for MP4) */}
+{!isYouTube && !isPlaying && (
+  <div
+    className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
+    onClick={togglePlay}
+  >
+    <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center">
+      <Play className="h-10 w-10 text-primary-foreground ml-1" />
+    </div>
+  </div>
+)}
 
+
+     {/* Controls (ONLY for MP4) */}
+{!isYouTube && (
+  <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 transition-opacity duration-300 ${
+    showControls ? "opacity-100" : "opacity-0"
+  }`}>
+
+    {/* Progress Bar */}
+    <div className="mb-3">
+      <Slider
+        value={[currentTime]}
+        max={duration || 100}
+        step={0.1}
+        onValueChange={handleSeek}
+      />
+    </div>
         {/* Control Buttons */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
