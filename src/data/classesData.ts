@@ -61,6 +61,15 @@ export const subjects: Subject[] = [
     description: "Enhance your Computer proficiency",
     subtopicsCount: 15,
   },
+
+  {
+    id: "yt-classes",
+    name: "Youtube Classes",
+    icon: "▶️",
+    color: "from-orange-500 to-red-500",
+    description: "Here is the best classes of youtube",
+    subtopicsCount: 26,
+  },
 ];
 
 export const subtopics: Subtopic[] = [
@@ -94,6 +103,9 @@ export const subtopics: Subtopic[] = [
 { id: "maths-coordinate-geometry", subjectId: "maths", name: "Coordinate Geometry", classesCount: 12, duration: "8 hrs" },
 { id: "maths-statistics", subjectId: "maths", name: "Statistics", classesCount: 6, duration: "4 hrs" },
 { id: "maths-data-interpretation", subjectId: "maths", name: "Data Interpretation", classesCount: 14, duration: "8 hrs" },
+
+
+  { id: "yt-lcm&hcf", subjectId: "yt-classes", name: "Youtube LCM & HCF", classesCount: 10, duration: "5 hrs" },
 
   
   // Reasoning subtopics
@@ -443,6 +455,19 @@ export const classes: ClassItem[] = [
     videoUrl: "/AbhinaySharma/Mixture&Alligation/AMS-1_Abhinay Sharma sir.mp4",
     pdfUrl: "/pdfs/AMS-1.pdf",
     description: "Learn the fundamentals of Hindi grammar including sentence structure and parts of speech.",
+    isCompleted: false,
+  },
+// youtube classes
+
+  {
+    id: "ytlcmhcf-1",
+    subtopicId: "yt-lcm&hcf",
+    title: "LCM & HCF Shortcuts By Abhinay Sharma
+    teacher: "Abhinay Sharma",
+    thumbnail: "/images/Abhinay_sir.jpg",
+    videoUrl: "https://www.youtube.com/live/SPTyAhOtVGg?si=kK3Jf7Pg47h95TOZ",
+    pdfUrl: "",
+    description: "Learn The Core Concepts Of LCM & HCF.",
     isCompleted: false,
   },
   // English Grammar classes
