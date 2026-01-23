@@ -185,7 +185,7 @@ export const classes: ClassItem[] = [
     duration: "90:55 min",
     teacher: "Abhinay Sharma",
     thumbnail: "/images/Abhinay_sir.jpg",
-    videoUrl: "https://youtu.be/JN9b3bHMGok",
+    videoUrl: "https://archive.org/details/abhinaymaths_202104",
     pdfUrl: "/pdfs/Compound Interestart-2.pdf",
     description: "Learn the fundamentals of Hindi grammar including sentence structure and parts of speech.",
     isCompleted: false,
