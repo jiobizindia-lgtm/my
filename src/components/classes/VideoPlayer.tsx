@@ -191,257 +191,85 @@ const VideoPlayer = ({ src, poster, className }: VideoPlayerProps) => {
   };
 
   return (
-    <div
-      ref={containerRef}
-      className={`relative bg-black rounded-lg overflow-hidden group ${className}`}
-      style={containerStyle}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-      onMouseMove={() => setShowControls(true)}
-    >
-{isYouTube ? (
-  <iframe
-    src={
-      src.startsWith("yt:")
-        ? `https://www.youtube.com/embed/${src.replace("yt:", "")}`
-        : src.replace("watch?v=", "embed/").replace("/live/", "/embed/")
-    }
-    className="w-full h-full"
-    allow="autoplay; encrypted-media; picture-in-picture"
-    allowFullScreen
-  />
-) : (
-  <video
-    ref={videoRef}
-    src={src}
-    poster={poster}
-    className="w-full h-full object-contain cursor-pointer"
-    onClick={togglePlay}
-    playsInline
-  />
-)}
-
-
-
-      {/* Play/Pause Overlay (ONLY for MP4) */}
-{!isYouTube && !isPlaying && (
   <div
-    className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
-    onClick={togglePlay}
+    ref={containerRef}
+    className={`relative bg-black rounded-lg overflow-hidden group ${className}`}
+    style={containerStyle}
+    onMouseEnter={() => setIsHovering(true)}
+    onMouseLeave={() => setIsHovering(false)}
+    onMouseMove={() => setShowControls(true)}
   >
-    <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center">
-      <Play className="h-10 w-10 text-primary-foreground ml-1" />
-    </div>
-  </div>
-)}
-
-
-     {/* Controls (ONLY for MP4) */}
-{!isYouTube && (
-  <div className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent p-4 transition-opacity duration-300 ${
-    showControls ? "opacity-100" : "opacity-0"
-  }`}>
-
-    {/* Progress Bar */}
-    <div className="mb-3">
-      <Slider
-        value={[currentTime]}
-        max={duration || 100}
-        step={0.1}
-        onValueChange={handleSeek}
+    {/* Video / YouTube */}
+    {isYouTube ? (
+      <iframe
+        src={
+          src.startsWith("yt:")
+            ? `https://www.youtube.com/embed/${src.replace("yt:", "")}`
+            : src.replace("watch?v=", "embed/").replace("/live/", "/embed/")
+        }
+        className="w-full h-full"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
       />
-    </div>
-        {/* Control Buttons */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* Play/Pause */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={togglePlay}
-              className="text-white hover:bg-white/20 h-9 w-9"
-            >
-              {isPlaying ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5 ml-0.5" />}
-            </Button>
+    ) : (
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        className="w-full h-full object-contain cursor-pointer"
+        onClick={togglePlay}
+        playsInline
+      />
+    )}
 
-            {/* Skip Backward */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => skip(-10)}
-              className="text-white hover:bg-white/20 h-9 w-9"
-            >
-              <SkipBack className="h-4 w-4" />
-            </Button>
-
-            {/* Skip Forward */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => skip(10)}
-              className="text-white hover:bg-white/20 h-9 w-9"
-            >
-              <SkipForward className="h-4 w-4" />
-            </Button>
-
-            {/* Volume */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleMute}
-                className="text-white hover:bg-white/20 h-9 w-9"
-              >
-                {isMuted || volume === 0 ? (
-                  <VolumeX className="h-5 w-5" />
-                ) : (
-                  <Volume2 className="h-5 w-5" />
-                )}
-              </Button>
-              <Slider
-                value={[isMuted ? 0 : volume]}
-                max={1}
-                step={0.01}
-                onValueChange={handleVolumeChange}
-                className="w-20 cursor-pointer [&_[role=slider]]:h-2.5 [&_[role=slider]]:w-2.5 [&_[role=slider]]:bg-white"
-              />
-            </div>
-
-            {/* Time */}
-            <span className="text-white text-sm font-medium ml-2">
-              {formatTime(currentTime)} / {formatTime(duration)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            {/* Playback Speed */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-white hover:bg-white/20 h-9 px-2 text-sm"
-                >
-                  {playbackSpeed}x
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="min-w-[80px] bg-background">
-                {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.5, 3, 3.5, 4].map((speed) => (
-                  <DropdownMenuItem
-                    key={speed}
-                    onClick={() => handleSpeedChange(speed)}
-                    className={playbackSpeed === speed ? "bg-accent" : ""}
-                  >
-                    {speed}x
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Size Controls */}
-            <DropdownMenu open={showSizeControls} onOpenChange={setShowSizeControls}>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-white hover:bg-white/20 h-9 w-9"
-                >
-                  <Move className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 p-3 bg-background">
-                <div className="space-y-3">
-                  <div className="text-sm font-medium">Custom Size</div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-8">W:</span>
-                    <Input
-                      type="number"
-                      placeholder="Auto"
-                      value={customWidth ?? ''}
-                      onChange={(e) => setCustomWidth(e.target.value ? Number(e.target.value) : null)}
-                      className="h-8 text-sm"
-                      min={200}
-                      max={1920}
-                    />
-                    <span className="text-xs text-muted-foreground">px</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-8">H:</span>
-                    <Input
-                      type="number"
-                      placeholder="Auto"
-                      value={customHeight ?? ''}
-                      onChange={(e) => setCustomHeight(e.target.value ? Number(e.target.value) : null)}
-                      className="h-8 text-sm"
-                      min={150}
-                      max={1080}
-                    />
-                    <span className="text-xs text-muted-foreground">px</span>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button size="sm" variant="outline" onClick={resetSize} className="flex-1 h-7 text-xs">
-                      Reset
-                    </Button>
-                    <Button size="sm" onClick={() => setShowSizeControls(false)} className="flex-1 h-7 text-xs">
-                      Apply
-                    </Button>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Presets:
-                  </div>
-                  <div className="flex flex-wrap gap-1">
-                    {[
-                      { w: 640, h: 360, label: '360p' },
-                      { w: 854, h: 480, label: '480p' },
-                      { w: 1280, h: 720, label: '720p' },
-                      { w: 1920, h: 1080, label: '1080p' },
-                    ].map((preset) => (
-                      <Button
-                        key={preset.label}
-                        size="sm"
-                        variant="secondary"
-                        className="h-6 px-2 text-xs"
-                        onClick={() => {
-                          setCustomWidth(preset.w);
-                          setCustomHeight(preset.h);
-                        }}
-                      >
-                        {preset.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Picture in Picture */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={togglePiP}
-              className="text-white hover:bg-white/20 h-9 w-9"
-            >
-              <PictureInPicture2 className="h-4 w-4" />
-            </Button>
-
-            {/* Fullscreen */}
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleFullscreen}
-              className="text-white hover:bg-white/20 h-9 w-9"
-            >
-              {isFullscreen ? (
-                <Minimize className="h-5 w-5" />
-              ) : (
-                <Maximize className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+    {/* Play Overlay */}
+    {!isYouTube && !isPlaying && (
+      <div
+        className="absolute inset-0 flex items-center justify-center bg-black/30 cursor-pointer"
+        onClick={togglePlay}
+      >
+        <div className="w-20 h-20 rounded-full bg-primary/90 flex items-center justify-center">
+          <Play className="h-10 w-10 text-primary-foreground ml-1" />
         </div>
       </div>
-    </div>
-  );
+    )}
+
+    {/* Controls */}
+    {!isYouTube && (
+      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-4">
+        <div className="mb-3">
+          <Slider
+            value={[currentTime]}
+            max={duration || 100}
+            step={0.1}
+            onValueChange={handleSeek}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <div className="flex gap-2">
+            <Button onClick={togglePlay} variant="ghost" size="icon">
+              {isPlaying ? <Pause /> : <Play />}
+            </Button>
+
+            <Button onClick={() => skip(-10)} variant="ghost" size="icon">
+              <SkipBack />
+            </Button>
+
+            <Button onClick={() => skip(10)} variant="ghost" size="icon">
+              <SkipForward />
+            </Button>
+          </div>
+
+          <Button onClick={toggleFullscreen} variant="ghost" size="icon">
+            {isFullscreen ? <Minimize /> : <Maximize />}
+          </Button>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 };
 
 export default VideoPlayer;
