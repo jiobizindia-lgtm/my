@@ -56,7 +56,7 @@ const Login = () => {
             <span className="text-primary-foreground font-bold text-xl">ED</span>
           </div>
           <CardTitle className="text-2xl gradient-text">Welcome Back</CardTitle>
-          <CardDescription>Login to your EduPortal account</CardDescription>
+          <CardDescription>Login to your PA account</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
