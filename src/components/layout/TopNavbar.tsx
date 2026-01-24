@@ -123,10 +123,10 @@ const TopNavbar = ({ onMenuToggle, isSidebarOpen, isHidden = false }: TopNavbarP
 
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">ED</span>
+                <span className="text-primary-foreground font-bold text-sm">PA</span>
               </div>
               <span className="hidden sm:block font-semibold text-lg gradient-text">
-                EduPortal
+                
               </span>
             </div>
           </div>
