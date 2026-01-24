@@ -105,9 +105,7 @@ export const subtopics: Subtopic[] = [
 { id: "maths-data-interpretation", subjectId: "maths", name: "Data Interpretation", classesCount: 14, duration: "8 hrs" },
 
 
-  { id: "yt-lcm&hcf", subjectId: "yt-classes", name: "Youtube LCM & HCF", classesCount: 10, duration: "5 hrs" },
 
-  
   // Reasoning subtopics
   { id: "reasoning-clock", subjectId: "reasoning", name: "Clock", classesCount: 15, duration: "10 hrs" },
   { id: "reasoning-calender", subjectId: "reasoning", name: "Calendar", classesCount: 4, duration: "8 hrs" },
@@ -161,6 +159,14 @@ export const subtopics: Subtopic[] = [
 { id: "computer-shortcut", subjectId: "computer", name: "Computer Shortcuts & Keys", classesCount: 4, duration: "2 hrs" },
 { id: "computer-cloud", subjectId: "computer", name: "Cloud Computing", classesCount: 5, duration: "3 hrs" },
 
+// Youtube subtopics
+
+{ id: "yt-lcm&hcf", subjectId: "yt-classes", name: "Youtube LCM & HCF", classesCount: 10, duration: "90:28 min" },
+{ id: "yt-classes-boatstream", subjectId: "yt-classes", name: "Boat & Stream", classesCount: 1, duration: "61:08 min" },
+  { id: "yt-classes-tsd", subjectId: "yt-classes", name: "Time Speed & Distance", classesCount: 1, duration: "61:29 min" },
+  
+
+
 
 ];
 
@@ -185,7 +191,7 @@ export const classes: ClassItem[] = [
     duration: "90:55 min",
     teacher: "Abhinay Sharma",
     thumbnail: "/images/Abhinay_sir.jpg",
-    videoUrl: "https://archive.org/details/abhinaymaths_202104",
+    videoUrl: "/AbhinaySharma/SI_CI/CI-2_Abhinay Sharma Sir.mp4",
     pdfUrl: "/pdfs/Compound Interestart-2.pdf",
     description: "Learn the fundamentals of Hindi grammar including sentence structure and parts of speech.",
     isCompleted: false,
@@ -463,13 +469,41 @@ export const classes: ClassItem[] = [
     id: "ytlcmhcf-1",
     subtopicId: "yt-lcm&hcf",
     title: "LCM & HCF Shortcuts By Abhinay Sharma",
+    duration: "92:38 min",
     teacher: "Abhinay Sharma",
     thumbnail: "/images/Abhinay_sir.jpg",
     videoUrl: "https://www.youtube.com/live/SPTyAhOtVGg?si=kK3Jf7Pg47h95TOZ",
     pdfUrl: "",
-    description: "Learn The Core Concepts Of LCM & HCF.",
+    description: "Top-Notch Questions LCM & HCF.",
     isCompleted: false,
   },
+  {
+    id: "ytboatstream-1",
+    subtopicId: "yt-classes-boatstream",
+    title: "Top-Notch Questions Train Boat & Stream By Abhinay Sharma",
+    duration: "92:38 min",
+    teacher: "Abhinay Sharma",
+    thumbnail: "/images/Abhinay_sir.jpg",
+    videoUrl: "https://www.youtube.com/live/8RRLB4_OB8M?si=FGICIrBy9GBbakBW",
+    pdfUrl: "",
+    description: "Top-Notch Questions Train Boat & Stream.",
+    isCompleted: false,
+  },
+  
+  {
+    id: "yttsd-1",
+    subtopicId: "yt-classes-tsd",
+    title: "Top-Notch Questions Time Speed & Distance By Abhinay Sharma",
+    duration: "61:29 min",
+    teacher: "Abhinay Sharma",
+    thumbnail: "/images/Abhinay_sir.jpg",
+    videoUrl: "https://www.youtube.com/live/Jw9N_wvA47s?si=I35oj5p2T5SSi9MO",
+    pdfUrl: "",
+    description: "Top-Notch Questions Time Speed & Distance.",
+    isCompleted: false,
+  },
+
+  
   // English Grammar classes
   {
     id: "eg-1",
