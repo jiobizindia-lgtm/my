@@ -116,7 +116,7 @@ const Register = () => {
             <span className="text-primary-foreground font-bold text-xl">PA</span>
           </div>
           <CardTitle className="text-2xl gradient-text">Create Account</CardTitle>
-          <CardDescription>Register to access EduPortal</CardDescription>
+          <CardDescription>Register to access PA Portal</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
