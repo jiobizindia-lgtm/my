@@ -94,7 +94,7 @@ const Register = () => {
     if (success) {
       toast({
         title: "Registration Successful!",
-        description: "Your account has been created. Welcome to EduPortal!",
+        description: "Your account has been created. Welcome to PA Portal!",
       });
       navigate("/");
     } else {
@@ -113,7 +113,7 @@ const Register = () => {
       <Card className="w-full max-w-2xl glass-card">
         <CardHeader className="text-center">
           <div className="mx-auto w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4">
-            <span className="text-primary-foreground font-bold text-xl">ED</span>
+            <span className="text-primary-foreground font-bold text-xl">PA</span>
           </div>
           <CardTitle className="text-2xl gradient-text">Create Account</CardTitle>
           <CardDescription>Register to access EduPortal</CardDescription>
