@@ -14,6 +14,7 @@ const Classes = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [questionsOnly, setQuestionsOnly] = useState<boolean>(false); // New state
   const { setHideNavbar } = useLayout();
 
   const currentSubtopics = selectedSubject ? getSubtopicsBySubject(selectedSubject) : [];
@@ -24,6 +25,7 @@ const Classes = () => {
     if (view === "player") { 
       setView("classes"); 
       setSelectedClass(null); 
+      setQuestionsOnly(false); // Reset questionsOnly when leaving player
     }
     else if (view === "classes") { 
       setView("subtopics"); 
@@ -38,10 +40,18 @@ const Classes = () => {
   const handleBackFromPlayer = () => {
     setView("classes");
     setSelectedClass(null);
+    setQuestionsOnly(false); // Reset questionsOnly when leaving player
   };
 
   const handleMobileNavbarHide = (hide: boolean) => {
     setHideNavbar(hide);
+  };
+
+  // Function to handle class selection with questionsOnly option
+  const handleClassSelect = (classId: string, questionsOnlyMode: boolean = false) => {
+    setSelectedClass(classId);
+    setQuestionsOnly(questionsOnlyMode);
+    setView("player");
   };
 
   return (
@@ -129,14 +139,36 @@ const Classes = () => {
             <Card 
               key={cls.id} 
               className="glass-card overflow-hidden cursor-pointer hover:shadow-lg transition-all"
-              onClick={() => { setSelectedClass(cls.id); setView("player"); }}
             >
               <div className="relative">
                 <img src={cls.thumbnail} alt={cls.title} className="w-full h-40 object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
-                <Button size="icon" className="absolute bottom-3 right-3 rounded-full gradient-primary">
-                  <Play className="h-4 w-4" />
-                </Button>
+                
+                {/* Two play buttons - one for normal mode, one for questions only */}
+                <div className="absolute bottom-3 right-3 flex gap-2">
+                  <Button 
+                    size="icon" 
+                    className="rounded-full bg-secondary hover:bg-secondary/80"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClassSelect(cls.id, true);
+                    }}
+                    title="Questions Only"
+                  >
+                    <span className="text-xs font-bold">Q</span>
+                  </Button>
+                  <Button 
+                    size="icon" 
+                    className="rounded-full gradient-primary"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleClassSelect(cls.id, false);
+                    }}
+                  >
+                    <Play className="h-4 w-4" />
+                  </Button>
+                </div>
+                
                 {cls.isCompleted && <Badge className="absolute top-3 left-3 bg-success">Completed</Badge>}
               </div>
               <CardContent className="p-4">
@@ -149,6 +181,15 @@ const Classes = () => {
                     <User className="h-4 w-4" />{cls.teacher}
                   </span>
                 </div>
+                
+                {/* Optional: Show if class has questions */}
+                {cls.hasQuestions && (
+                  <div className="mt-3">
+                    <Badge variant="outline" className="text-xs">
+                      Includes Practice Questions
+                    </Badge>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
@@ -161,6 +202,7 @@ const Classes = () => {
           currentClass={currentClass} 
           onBack={handleBackFromPlayer}
           onMobileNavbarHide={handleMobileNavbarHide}
+          questionsOnly={questionsOnly} // Pass the questionsOnly prop
         />
       )}
     </div>
