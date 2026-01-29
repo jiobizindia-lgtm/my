@@ -26,6 +26,9 @@ export interface ClassItem {
   pdfUrl: string;
   description: string;
   isCompleted: boolean;
+  hasQuestions?: boolean; // Change from "true," to "boolean?"
+  // You might also want to add:
+  // questions?: QuestionType[]; // If you have question data
 }
 
 export const subjects: Subject[] = [
