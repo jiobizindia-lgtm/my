@@ -1386,6 +1386,116 @@ export const classQuestions: ClassQuestion[] = [
 
 
       // Math Simple intrest Class-5 : mcs-12
+  
+  {
+    "id": "si-5-q1",
+    "classId": "mcs-12",
+    "questionNumber": 1,
+    "text": "A certain amount at certain rate of simple interest for certain time gives a certain interest. The amount is increased by 20%, rate is made 2/3 of the previous and time is made 6/5 of the previous. In this way, the simple interest received is Rs.2400. What was the interest received in the first condition?\nकुछ समय के लिए साधारण ब्याज की निश्चित दर पर एक निश्चित राशि एक निश्चित ब्याज देती है। राशि में 20% की वृद्धि हुई है, दर अब पिछले के 2/3 है और समय पिछले के 6/5 है। इस तरह प्राप्त साधारण ब्याज 2400 रुपए है। पहली बार में क्या ब्याज मिला था?",
+    "options": ["Rs.3000", "Rs.2400", "Rs.2500", "None of these"],
+    "correctAnswer": 3,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q2",
+    "classId": "mcs-12",
+    "questionNumber": 2,
+    "text": "A sum of money was lent in two parts in the ratio 4 : 5 for 4 years and 5 years respectively, both at the rate of 8% per annum simple interest. If the difference between the interests earned from the two parts is ₹4680, then what was the total sum lent (in ₹)?\n4 : 5 के अनुपात में कोई धन राशि दो भागों में क्रमशः 4 वर्ष और 5 वर्ष के लिए उधार दी गई, दोनों भाग को 8% वार्षिक साधारण ब्याज की दर पर दिया गया है। यदि दोनों भागों से प्राप्त ब्याज के बीच अंतर ₹4680 था, तो उधार दी गई कुल राशि (₹में) ज्ञात करें।",
+    "options": ["₹42,120", "₹46,800", "₹65,000", "₹58,500"],
+    "correctAnswer": 1,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q3",
+    "classId": "mcs-12",
+    "questionNumber": 3,
+    "text": "A sum of ₹27,000 is divided into two parts A and B such that the simple interest at the rate of 15% p.a. on A and B after two years and four years respectively, is equal. The total interest (in ₹) received together from A and B is:\n₹27,000 की राशि को दो भाग A और B में इस प्रकार विभाजित किया जाता है कि 15% वार्षिक दर पर A और B पर क्रमशः दो वर्ष और चार वर्ष बाद प्राप्त साधारण व्याज बराबर है। A और B दोनों से प्राप्त कुल व्याज (₹ में) ज्ञात करें।",
+    "options": ["9,600", "5,400", "18,000", "10,800"],
+    "correctAnswer": 4,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q4",
+    "classId": "mcs-12",
+    "questionNumber": 4,
+    "text": "A sum of ₹5,000 is divided into two parts such that the simple interest on the first part for 4 years at 6% p.a is double the simple interest on the second part for 2 years at 4% p.a. What is the difference between the two parts?\n₹.5000 की राशि को दो भागों में इस प्रकार विभाजित किया जाता है कि पहले भाग पर 6% प्रतिवर्ष की दर से 4 सालो के लिए साधारण व्याज, दूसरे भाग पर 4% प्रतिवर्ष की दर से 2 सालो के लिए साधारण व्याज से दोगुना होता है। दोनों भागों में कितना अंतर है?",
+    "options": ["620", "680", "560", "600"],
+    "correctAnswer": 4,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q5",
+    "classId": "mcs-12",
+    "questionNumber": 5,
+    "text": "A sum of ₹50,250 is divided into two parts such that the simple interest on the first part for 7.5 years at 8⅓% p.a. is 2.5 times the simple interest on the second part for 5.25 years at 8% p.a. What is the difference (in ₹) between the two parts?\n₹50,250 की राशि को दो भागों में इस प्रकार विभाजित किया जाता है कि पहले भाग पर 7.5 वर्ष का साधारण ब्याज प्रति 8⅓% वर्ष की दर से, 8% प्रति वर्ष की दर से 5.25 वर्षों के लिए दूसरे भाग पर साधारण ब्याज का 2.5 गुना है। दोनों भागों के बीच का अंतर (रुपये में) क्या है?",
+    "options": ["10,275", "12,750", "12,570", "15,270"],
+    "correctAnswer": 2,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q6",
+    "classId": "mcs-12",
+    "questionNumber": 6,
+    "text": "A portion of ₹48,500 is invested at 15% simple interest per annum. After 2 years of the first investment, the remaining amount is invested at 10% simple interest per annum. After 5 years from the time of investment of the first amount, the ratio of interest is 5 : 3. What is the value (in ₹) of the second portion invested at 10% simple interest?\n₹48,500 का एक हिस्सा 15% प्रति वर्ष के साधारण व्याज पर निवेश किया जाता है। पहले निवेश के 2 वर्ष बाद, शेष धनराशि 10% वार्षिक साधारण व्याज की दर से निवेश की जाती है। पहली धनराशि के निवेश के समय से 5 वर्ष बाद, व्याज का अनुपात 5 : 3 है। 10% साधारण व्याज की दर पर निवेश किया गया दूसरा हिस्सा (₹में) कितना है?",
+    "options": ["29,100", "20,940", "24,900", "19,400"],
+    "correctAnswer": 1,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q7",
+    "classId": "mcs-12",
+    "questionNumber": 7,
+    "text": "If the amount obtained by A by investing Rs 9,100 for three years at a rate of 10% p.a. on simple interest is equal to the amount obtained by B by investing a certain sum of money for five years at a rate of 8% p.a. on simple interest, then 90% of the sum invested by B (in Rs) is:\nयदि A द्वारा साधारण ब्याज पर वार्षिक 10% की ब्याज दर से तीन वर्षों के लिए रूपये 9100 का निवेश करके प्राप्त की गई धनराशि, B द्वारा साधारण ब्याज पर वार्षिक 8% की ब्याज दर से पांच वर्षों के लिए एक निश्चित राशि का निवेश करके प्राप्त की गई राशि के बराबर है, तो B द्वारा निवेश की गई राशि का 90% ( रूपये में ) ज्ञात करें।",
+    "options": ["7,800", "7,605", "8,540", "8,450"],
+    "correctAnswer": 2,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q8",
+    "classId": "mcs-12",
+    "questionNumber": 8,
+    "text": "A person borrowed a sum at 6% per annum and returned Rs. 8400 after 1 year. Now the rate of interest is becomes 5% per annum on the rest of the amount. If the interest of second year is 13/20 of first year S.I. What amount was borrowed?\nकोई धन 6% की दर पर उधार लिया गया। 1 साल के बाद 8400 रु. वापस कर दिये। अब ब्याज की दर 5% कर दी तो अब जो भी धनराशि बची है। उस पर 5% के हिसाब से ब्याज देना होगा। दूसरे वर्ष का जो ब्याज है वो पहले वर्ष के ब्याज का 13/20 है। कितना पैसा उधार लिया गया था?",
+    "options": ["Rs. 32,000", "Rs. 28,000", "Rs. 30,000", "Rs. 31,250"],
+    "correctAnswer": 4,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q9",
+    "classId": "mcs-12",
+    "questionNumber": 9,
+    "text": "A part of INR 44500 is lent out at 15% simple interest per six months. The rest of the amount is lent out at 18% p.a. simple interest after one year. The ratio of interest after 4 years from the time when the first amount was lent out is 10:3. Find the second part that was lent out at 18%?\n44500 रु. के एक भाग को 15% प्रति अधिवार्षिक साधारण ब्याज की दर से दिया गया है। जबकि शेष भाग को 1 साल बाद 18% वार्षिक साधारण ब्याज की दर पर दिया गया है पहले भाग को उधार देने के समय के 4 वर्ष बाद दोनों भागो पर प्राप्त ब्याज का अनुपात 10:3 है। 18% की ब्याज दर पर दिया गया भाग कितना था।",
+    "options": ["INR 16,900", "INR 17,900", "INR 16,800", "INR 17,800"],
+    "correctAnswer": 1,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q10",
+    "classId": "mcs-12",
+    "questionNumber": 10,
+    "text": "A sum of Rs. 14000 is lent out in two parts in such a way that first part is given at 5% per annum and second part at 8% per annum. If the simple interest received on sum given at 5% is Rs. 92.25 more than the simple interest on sum given at 8% in one year. Find the sum lend at 8% per annum?\n14000 रुपये की धनराशि को दो भागों में इस प्रकार बांटा गया है कि पहले भाग पर 5% वार्षिक साधारण व्याज की दर और दूसरे भाग पर 8% वार्षिक साधारण व्याज की दर से ब्याज मिलता है एक वर्ष के बाद 5% कि दरवाले भाग पर प्राप्त ब्याज, 8% की दर वाले भाग पर प्राप्त ब्याज से 92.25 रुपए अधिक है तब 8% वार्षिक दरवाला भाग कितना था?",
+    "options": ["₹4,675", "₹5,125", "₹4,450", "₹4,265"],
+    "correctAnswer": 1,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q11",
+    "classId": "mcs-12",
+    "questionNumber": 11,
+    "text": "A man takes a loan of some amount at some rate of simple interest. After three years, the loan amount is doubled and rate of interest is decreased by 2%. After 5 more years, if the total interest paid on the whole is Rs. 13,600, which is equal to the same when the first amount was taken for 11 years, then the loan taken initially is:\nएक व्यक्ति साधारण ब्याज की किसी दर पर एक निश्चित धनराशि ऋण के रूप में लेता है। तीन वर्षों के बाद, ऋण की धनराशि दोगुनी और ब्याज दर 2% कम हो जाती है। अब से 5 वर्षों के बाद, यदि पूरी धनराशि पर दिया गया कुल ब्याज Rs. 13,600 है, जो उस पहली धनराशि के ब्याज के बराबर है जो 11 वर्षों के लिए ऋण के रूप में ली गई थी, तो लिए गए आरंभिक ऋण की राशि कीजिए।",
+    "options": ["₹13,600", "₹12,500", "₹10,000", "₹12,000"],
+    "correctAnswer": 3,
+    "explanation": null
+  },
+  {
+    "id": "si-5-q12",
+    "classId": "mcs-12",
+    "questionNumber": 12,
+    "text": "A sum of money (Rs. x) was invested for 8 years in a scheme which offers simple interest at the rate of 20% per annum. The interest received after 8 years was reinvested in the same scheme for the same period. If the interest received after reinvesting for the said period was Rs. 'x + 7020', what is the value of x?\nएक धनराशि (x रुपये) को 8 वर्षों के लिए एक योजना में निवेश किया गया था, जो 20% प्रति वर्ष की दर से साधारण ब्याज प्रदान करती है। 8 वर्षों के बाद प्राप्त ब्याज को उसी योजना में उसी अवधि के लिए फिर से निवेश किया गया। यदि उक्त अवधि के लिए पुनः निवेश के बाद प्राप्त ब्याज 'x + 7020' रुपये था, तो x का मान क्या है?",
+    "options": ["6400", "4800", "4500", "6000", "4850"],
+    "correctAnswer": 5,
+    "explanation": null
+  },
+
        // Math Simple intrest Class-6 : mcs-13
     // Math Simple intrest Class-7 : mcs-14
     
