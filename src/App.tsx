@@ -1,3 +1,4 @@
+// src/App.tsx (updated import: uses the firebase module instead of inline config)
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,8 +17,11 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+
+/* Previously App.tsx contained the Firebase config and initializeApp call.
+   That logic has been moved to src/firebase/firebase.ts and reads its values
+   from environment variables. This keeps keys out of the committed source.
+*/
 
 const queryClient = new QueryClient();
 
@@ -31,27 +35,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// Import the functions you need from the SDKs you need
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAev9PzUAbBzchoNPVOm9b8Hxb-O1QwIuY",
-  authDomain: "talkingisright.firebaseapp.com",
-  projectId: "talkingisright",
-  storageBucket: "talkingisright.firebasestorage.app",
-  messagingSenderId: "465611317224",
-  appId: "1:465611317224:web:0e64fac06a01a259b34e5d",
-  measurementId: "G-LCBJ35T3ND"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
   
@@ -64,17 +47,10 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppRoutes = () => (
   <Routes>
-    {/* Welcome route - public landing page */}
     <Route path="/welcome" element={<Welcome />} />
-    
-    {/* Home route - goes to welcome if not authenticated, dashboard if authenticated */}
     <Route path="/" element={<PublicRoute><Welcome /></PublicRoute>} />
-    
-    {/* Public routes */}
     <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
     <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-    
-    {/* Protected routes */}
     <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/academic" element={<AcademicPerformance />} />
