@@ -306,6 +306,7 @@ export const classes: ClassItem[] = [
     pdfUrl: "/pdfs/Simple Interest-4.pdf",
     description: "Learn the fundamentals of Hindi grammar including sentence structure and parts of speech.",
     isCompleted: false,
+    hasQuestions: true,
   },
   {
     id: "mcs-12",
@@ -318,6 +319,7 @@ export const classes: ClassItem[] = [
     pdfUrl: "/pdfs/Simple Interest-5.pdf",
     description: "Learn the fundamentals of Hindi grammar including sentence structure and parts of speech.",
     isCompleted: false,
+    hasQuestions: true,
   },
   {
     id: "mcs-13",
