@@ -16,6 +16,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Welcome from "./pages/Welcome";
 import NotFound from "./pages/NotFound";
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,27 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   return <>{children}</>;
 };
+
+// Import the functions you need from the SDKs you need
+
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAev9PzUAbBzchoNPVOm9b8Hxb-O1QwIuY",
+  authDomain: "talkingisright.firebaseapp.com",
+  projectId: "talkingisright",
+  storageBucket: "talkingisright.firebasestorage.app",
+  messagingSenderId: "465611317224",
+  appId: "1:465611317224:web:0e64fac06a01a259b34e5d",
+  measurementId: "G-LCBJ35T3ND"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated } = useAuth();
