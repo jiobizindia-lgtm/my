@@ -1,40 +1,198 @@
-import { useState } from "react";
+// src/pages/Chat.tsx
+import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, AlertTriangle, Search, Palette } from "lucide-react";
-import { chatUsers, currentStudent } from "@/data/studentData";
+import { Send, AlertTriangle, Search, Palette, Paperclip } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
+import { db, storage } from "@/firebase/firebase";
+import {
+  collection,
+  query,
+  where,
+  onSnapshot,
+  addDoc,
+  orderBy,
+  serverTimestamp,
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  limit,
+  QuerySnapshot,
+  DocumentData,
+} from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
-const themes = [
-  { name: "Light", class: "bg-background" },
-  { name: "Dark", class: "bg-slate-900" },
-  { name: "Blue", class: "bg-blue-950" },
-  { name: "Exam", class: "bg-amber-50" },
-];
+type Room = {
+  id: string;
+  name?: string;
+  isGroup?: boolean;
+  members: string[];
+  lastMessage?: string;
+  createdAt?: any;
+  createdBy?: string;
+};
+
+type Message = {
+  id?: string;
+  text?: string;
+  type?: "text" | "file";
+  file?: { name: string; url: string; size: number; mime: string };
+  senderId: string;
+  senderName?: string;
+  createdAt?: any;
+};
 
 const Chat = () => {
-  const [selectedUser, setSelectedUser] = useState<string | null>(null);
-  const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<{ text: string; sent: boolean; time: string }[]>([
-    { text: "Hey! Did you complete the quant assignment?", sent: false, time: "10:30 AM" },
-    { text: "Yes, just finished it!", sent: true, time: "10:32 AM" },
-    { text: "Can you share your notes for the last chapter?", sent: false, time: "10:33 AM" },
-  ]);
-  const [theme, setTheme] = useState(0);
-  const [showThemes, setShowThemes] = useState(false);
+  const { user, firebaseUser } = useAuth();
+  const uid = firebaseUser?.uid || "";
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [messageText, setMessageText] = useState("");
+  const [creatingRoom, setCreatingRoom] = useState(false);
+  const [newRoomName, setNewRoomName] = useState("");
+  const [isGroup, setIsGroup] = useState(false);
+  const [fileUploading, setFileUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
-  const sendMessage = () => {
-    if (message.trim()) {
-      setMessages([...messages, { text: message, sent: true, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }]);
-      setMessage("");
+  // Listen for rooms where the user is a member
+  useEffect(() => {
+    if (!uid) return;
+    const roomsRef = collection(db, "rooms");
+    const q = query(roomsRef, where("members", "array-contains", uid), orderBy("createdAt", "desc"));
+    const unsub = onSnapshot(q, (snap) => {
+      const r: Room[] = [];
+      snap.forEach((doc) => {
+        r.push({ id: doc.id, ...(doc.data() as any) });
+      });
+      setRooms(r);
+      // auto-select first room if none selected
+      if (!selectedRoom && r.length > 0) setSelectedRoom(r[0]);
+    });
+    return () => unsub();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uid]);
+
+  // Listen for messages in selectedRoom
+  useEffect(() => {
+    if (!selectedRoom) {
+      setMessages([]);
+      return;
+    }
+    const messagesRef = collection(db, "rooms", selectedRoom.id, "messages");
+    const q = query(messagesRef, orderBy("createdAt", "asc"));
+    const unsub = onSnapshot(q, (snap) => {
+      const msgs: Message[] = [];
+      snap.forEach((doc) => msgs.push({ id: doc.id, ...(doc.data() as any) }));
+      setMessages(msgs);
+      // scroll to bottom
+      setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    });
+    return () => unsub();
+  }, [selectedRoom]);
+
+  const createRoom = async () => {
+    if (!uid) return;
+    if (!isGroup && !newRoomName) {
+      // For 1:1 we will create a room with the logged-in user and a generated placeholder
+      // For simplicity, 1:1 rooms are created by name = 'Direct:uid' (you can adapt for real user selection)
+    }
+    setCreatingRoom(true);
+    try {
+      const roomsRef = collection(db, "rooms");
+      const roomPayload: Partial<Room> = {
+        name: isGroup ? newRoomName || "New Group" : `Direct-${Date.now()}`,
+        isGroup: isGroup,
+        members: [uid], // in a production app you'd allow selecting other members
+        createdAt: serverTimestamp(),
+        createdBy: uid,
+      };
+      const docRef = await addDoc(roomsRef, roomPayload);
+      // Optionally update to add lastMessage etc.
+      setNewRoomName("");
+      setIsGroup(false);
+      // Select the created room
+      setSelectedRoom({ id: docRef.id, ...(roomPayload as any) });
+    } catch (err) {
+      console.error("Create room error", err);
+    } finally {
+      setCreatingRoom(false);
     }
   };
 
-  const selectedChat = chatUsers.find(u => u.id === selectedUser);
+  const sendMessage = async (fileData?: { name: string; url: string; size: number; mime: string }) => {
+    if (!selectedRoom || !uid) return;
+    if (!messageText && !fileData) return;
+
+    const messagesRef = collection(db, "rooms", selectedRoom.id, "messages");
+    const payload: any = {
+      senderId: uid,
+      senderName: user ? `${user.firstName || ""} ${user.surname || ""}`.trim() : "",
+      createdAt: serverTimestamp(),
+      type: fileData ? "file" : "text",
+    };
+    if (fileData) payload.file = fileData;
+    if (messageText) payload.text = messageText;
+
+    try {
+      await addDoc(messagesRef, payload);
+      // update lastMessage on room
+      const roomRef = doc(db, "rooms", selectedRoom.id);
+      await updateDoc(roomRef, {
+        lastMessage: fileData ? `${payload.senderName} sent a file` : messageText,
+        updatedAt: serverTimestamp(),
+      });
+      setMessageText("");
+    } catch (err) {
+      console.error("Send message error", err);
+    }
+  };
+
+  const onFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files && e.target.files[0];
+    if (!f || !selectedRoom || !uid) return;
+    const path = `uploads/${selectedRoom.id}/${Date.now()}_${f.name}`;
+    const storageRef = ref(storage, path);
+    setFileUploading(true);
+    const uploadTask = uploadBytesResumable(storageRef, f);
+    uploadTask.on(
+      "state_changed",
+      (snapshot) => {
+        // You can use snapshot to show progress
+      },
+      (error) => {
+        console.error("Upload error", error);
+        setFileUploading(false);
+      },
+      async () => {
+        const url = await getDownloadURL(uploadTask.snapshot.ref);
+        setFileUploading(false);
+        await sendMessage({
+          name: f.name,
+          url,
+          size: f.size,
+          mime: f.type || "application/octet-stream",
+        });
+      }
+    );
+    // reset input
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const openFilePicker = () => fileInputRef.current?.click();
+
+  const formatTime = (ts: any) => {
+    if (!ts) return "";
+    const d = ts?.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
 
   return (
     <div className="space-y-4 animate-fade-in h-[calc(100vh-8rem)]">
@@ -43,93 +201,126 @@ const Chat = () => {
         <p className="text-muted-foreground">Connect with your classmates</p>
       </div>
 
-      {/* Proctor Warning */}
-      <div className="flex items-center gap-2 p-3 rounded-lg bg-warning/10 border border-warning/30">
-        <AlertTriangle className="h-5 w-5 text-warning flex-shrink-0" />
-        <p className="text-sm font-medium">⚠️ This chat is monitored by the Proctor Team. Please maintain academic integrity.</p>
-      </div>
-
       <div className="grid lg:grid-cols-3 gap-4 h-[calc(100%-10rem)]">
-        {/* Users List */}
+        {/* Rooms list */}
         <Card className="glass-card lg:col-span-1">
           <CardHeader className="pb-2">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search chats..." className="pl-10" />
+            <div className="flex items-center justify-between">
+              <CardTitle>Conversations</CardTitle>
+              <div className="flex items-center gap-2">
+                <Input
+                  placeholder="New room name"
+                  value={newRoomName}
+                  onChange={(e) => setNewRoomName(e.target.value)}
+                />
+                <Button size="sm" onClick={() => setIsGroup((s) => !s)} aria-pressed={isGroup}>
+                  {isGroup ? "Group" : "1:1"}
+                </Button>
+                <Button size="sm" onClick={createRoom} disabled={creatingRoom}>
+                  Create
+                </Button>
+              </div>
             </div>
           </CardHeader>
+
           <CardContent>
-            <ScrollArea className="h-[400px]">
-              {chatUsers.map((user) => (
-                <button key={user.id} onClick={() => setSelectedUser(user.id)}
-                  className={cn("w-full flex items-center gap-3 p-3 rounded-lg transition-all text-left",
-                    selectedUser === user.id ? "bg-primary/10" : "hover:bg-muted")}>
-                  <div className="relative">
-                    <Avatar><AvatarFallback className="gradient-primary text-primary-foreground">{user.avatar}</AvatarFallback></Avatar>
-                    {user.online && <div className="absolute bottom-0 right-0 w-3 h-3 bg-success rounded-full border-2 border-background" />}
+            <ScrollArea className="h-[60vh]">
+              <div className="divide-y">
+                {rooms.length === 0 && <div className="p-4 text-sm text-muted-foreground">No conversations yet.</div>}
+                {rooms.map((r) => (
+                  <div
+                    key={r.id}
+                    className={cn(
+                      "p-3 cursor-pointer hover:bg-muted rounded-md flex items-center justify-between",
+                      selectedRoom?.id === r.id && "bg-muted"
+                    )}
+                    onClick={() => setSelectedRoom(r)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarFallback>{r.name ? r.name[0] : "U"}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">{r.name || (r.isGroup ? "Group" : "Direct")}</div>
+                        <div className="text-sm text-muted-foreground">{r.lastMessage || "No messages yet"}</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-muted-foreground">{/* timestamp placeholder */}</div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between"><span className="font-medium">{user.name}</span><span className="text-xs text-muted-foreground">{user.time}</span></div>
-                    <p className="text-sm text-muted-foreground truncate">{user.lastMessage}</p>
-                  </div>
-                  {user.unread > 0 && <Badge className="gradient-primary">{user.unread}</Badge>}
-                </button>
-              ))}
+                ))}
+              </div>
             </ScrollArea>
           </CardContent>
         </Card>
 
-        {/* Chat Area */}
-        <Card className={cn("glass-card lg:col-span-2 flex flex-col", themes[theme].class)}>
-          {selectedUser ? (
-            <>
-              <CardHeader className="border-b border-border flex-row items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Avatar><AvatarFallback className="gradient-primary text-primary-foreground">{selectedChat?.avatar}</AvatarFallback></Avatar>
-                  <div>
-                    <p className="font-medium">{selectedChat?.name}</p>
-                    <p className="text-xs text-muted-foreground">{selectedChat?.online ? "Online" : "Offline"}</p>
-                  </div>
-                </div>
-                <div className="relative">
-                  <Button variant="ghost" size="icon" onClick={() => setShowThemes(!showThemes)}><Palette className="h-4 w-4" /></Button>
-                  {showThemes && (
-                    <div className="absolute right-0 top-10 p-2 bg-card border rounded-lg shadow-lg z-10 space-y-1">
-                      {themes.map((t, i) => (
-                        <button key={t.name} onClick={() => { setTheme(i); setShowThemes(false); }}
-                          className={cn("w-full px-3 py-1 text-sm rounded hover:bg-muted text-left", theme === i && "bg-primary/10")}>
-                          {t.name}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <ScrollArea className="flex-1 p-4">
-                <div className="space-y-4">
-                  {messages.map((msg, i) => (
-                    <div key={i} className={cn("flex", msg.sent ? "justify-end" : "justify-start")}>
-                      <div className={cn("max-w-[70%] p-3 rounded-lg", msg.sent ? "bg-primary text-primary-foreground" : "bg-muted")}>
-                        <p className="text-sm">{msg.text}</p>
-                        <p className={cn("text-xs mt-1", msg.sent ? "text-primary-foreground/70" : "text-muted-foreground")}>{msg.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </ScrollArea>
-              <div className="p-4 border-t border-border">
-                <div className="flex gap-2">
-                  <Input placeholder="Type a message..." value={message} onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && sendMessage()} />
-                  <Button onClick={sendMessage} className="gradient-primary"><Send className="h-4 w-4" /></Button>
-                </div>
+        {/* Messages */}
+        <Card className="glass-card lg:col-span-2 flex flex-col">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>{selectedRoom ? selectedRoom.name || "Conversation" : "Select a conversation"}</CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  {selectedRoom ? `${selectedRoom.members.length} member(s)` : "No conversation selected"}
+                </p>
               </div>
-            </>
-          ) : (
-            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-              Select a chat to start messaging
+              <div className="flex items-center gap-2">
+                <input ref={fileInputRef} type="file" className="hidden" onChange={onFileSelected} />
+                <Button size="sm" variant="secondary" onClick={openFilePicker} disabled={!selectedRoom || fileUploading}>
+                  <Paperclip className="mr-2" /> Attach
+                </Button>
+              </div>
             </div>
-          )}
+          </CardHeader>
+
+          <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+            <ScrollArea className="flex-1 p-4">
+              <div className="space-y-4">
+                {messages.map((m) => (
+                  <div key={m.id} className={cn("flex gap-3", m.senderId === uid ? "justify-end" : "justify-start")}>
+                    {m.senderId !== uid && (
+                      <Avatar>
+                        <AvatarFallback>{m.senderName ? m.senderName[0] : "U"}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className={cn("max-w-xl px-4 py-2 rounded-lg", m.senderId === uid ? "bg-primary/10" : "bg-muted")}>
+                      <div className="text-sm">{m.senderName}</div>
+                      {m.type === "text" && <div className="mt-1">{m.text}</div>}
+                      {m.type === "file" && m.file && (
+                        <div className="mt-1">
+                          <a className="text-primary underline" href={m.file.url} target="_blank" rel="noreferrer">
+                            {m.file.name}
+                          </a>
+                          <div className="text-xs text-muted-foreground">{m.file.size ? `${Math.round(m.file.size / 1024)} KB` : ""}</div>
+                        </div>
+                      )}
+                      <div className="text-xs text-muted-foreground mt-1">{formatTime(m.createdAt)}</div>
+                    </div>
+                    {m.senderId === uid && (
+                      <Avatar>
+                        <AvatarFallback>{m.senderName ? m.senderName[0] : "U"}</AvatarFallback>
+                      </Avatar>
+                    )}
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+            </ScrollArea>
+
+            {/* Input */}
+            <div className="border-t p-4 flex items-center gap-2">
+              <Input
+                placeholder="Type a message..."
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") sendMessage();
+                }}
+              />
+              <Button onClick={() => sendMessage()} disabled={!selectedRoom}>
+                <Send />
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       </div>
     </div>
