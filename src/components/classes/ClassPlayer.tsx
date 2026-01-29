@@ -12,20 +12,23 @@ import VideoPlayer from "./VideoPlayer";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+// UPDATED: Add questionsOnly prop to the interface
 interface ClassPlayerProps {
   currentClass: ClassItem;
   onBack: () => void;
   onMobileNavbarHide?: (hide: boolean) => void;
   mobileActionSlot?: React.ReactNode;
-   questionsOnly?: boolean;
+  questionsOnly?: boolean; // Add this
 }
 
 type ViewMode = "video-questions" | "video-only" | "pdf";
 
-const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide }: ClassPlayerProps) => {
-  const [viewMode, setViewMode] = useState<ViewMode>("video-questions");
+// UPDATED: Accept questionsOnly prop
+const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide, questionsOnly = false }: ClassPlayerProps) => {
+  const [viewMode, setViewMode] = useState<ViewMode>(questionsOnly ? "video-questions" : "video-questions");
   const [pdfZoom, setPdfZoom] = useState(100);
   const [isNavbarCollapsed, setIsNavbarCollapsed] = useState(false);
+  const [showQuestionsOnly, setShowQuestionsOnly] = useState(questionsOnly); // Add this state
   const isMobile = useIsMobile();
   
   // Quiz state management
@@ -50,6 +53,14 @@ const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide }: ClassPlayerPr
     };
   }, [viewMode, onMobileNavbarHide]);
 
+  // UPDATED: Set initial view mode based on questionsOnly prop
+  useEffect(() => {
+    if (questionsOnly) {
+      setViewMode("video-questions");
+      setShowQuestionsOnly(true);
+    }
+  }, [questionsOnly]);
+
   const handleZoomIn = () => setPdfZoom(prev => Math.min(prev + 25, 200));
   const handleZoomOut = () => setPdfZoom(prev => Math.max(prev - 25, 50));
 
@@ -58,7 +69,7 @@ const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide }: ClassPlayerPr
   };
 
   const handleClosePdf = () => {
-    setViewMode("video-questions");
+    setViewMode(questionsOnly ? "video-questions" : "video-questions");
   };
 
   const handleAnswerChange = (questionId: string, optionIndex: number) => {
@@ -108,50 +119,11 @@ const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide }: ClassPlayerPr
     setIsNavbarCollapsed(!isNavbarCollapsed);
   };
 
+  const toggleQuestionsOnlyMode = () => {
+    setShowQuestionsOnly(!showQuestionsOnly);
+  };
 
-// In ClassPlayer component props
-interface ClassPlayerProps {
-  currentClass: ClassType;
-  onBack: () => void;
-  onMobileNavbarHide: (hide: boolean) => void;
-  questionsOnly?: boolean; // Add this
-}
-
-// Then inside your ClassPlayer component:
-const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide, questionsOnly = false }: ClassPlayerProps) => {
-  // ... existing code ...
-  
-  // You can use questionsOnly to conditionally render only the questions section
-  // For example:
-  const [showQuestionsOnly, setShowQuestionsOnly] = useState(questionsOnly);
-  
-  // ... rest of the component ...
-  
-  return (
-    <div className="class-player-container">
-      {/* You can add a toggle button to switch between normal view and questions only */}
-      {!questionsOnly && (
-        <Button onClick={() => setShowQuestionsOnly(!showQuestionsOnly)}>
-          {showQuestionsOnly ? "Show Full Class" : "Show Questions Only"}
-        </Button>
-      )}
-      
-      {showQuestionsOnly ? (
-        // Render only questions section
-        <div className="questions-only-view">
-          {/* Your questions component */}
-        </div>
-      ) : (
-        // Render normal class player
-        <div className="normal-class-view">
-          {/* Your existing class player UI */}
-        </div>
-      )}
-    </div>
-  );
-};
-
-  
+  // REMOVED: The duplicate component definition that was here
 
   // PDF View
   if (viewMode === "pdf") {
@@ -202,6 +174,86 @@ const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide, questionsOnly =
     );
   }
 
+  // UPDATED: Render based on questionsOnly mode
+  if (showQuestionsOnly) {
+    return (
+      <div className="animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => {
+              setShowQuestionsOnly(false);
+              if (!questionsOnly) {
+                onBack(); // Only call onBack if not in forced questionsOnly mode
+              }
+            }}>
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+              <h2 className="text-xl font-bold">{currentClass.title} - Practice Questions</h2>
+              <p className="text-sm text-muted-foreground">Questions Only Mode</p>
+            </div>
+          </div>
+          
+          {/* Only show "Show Full Class" button if not forced into questionsOnly mode */}
+          {!questionsOnly && (
+            <Button 
+              variant="outline" 
+              onClick={toggleQuestionsOnlyMode}
+              className="gap-2"
+            >
+              <Play className="h-4 w-4" />
+              Show Full Class
+            </Button>
+          )}
+        </div>
+
+        {/* Questions Only View */}
+        {hasQuestions ? (
+          <div className="space-y-4">
+            <QuestionPanel 
+              questions={questions}
+              onSubmit={handleSubmitAnswers}
+              currentIndex={currentIndex}
+              onIndexChange={setCurrentIndex}
+              answers={answers}
+              onAnswerChange={handleAnswerChange}
+              savedQuestions={savedQuestions}
+              onSave={handleSave}
+            />
+            
+            <ActionButtons
+              onSave={handleSave}
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              onSubmit={handleSubmitAnswers}
+              canSave={currentQuestion && answers[currentQuestion.id] !== undefined}
+              canGoPrevious={currentIndex > 0}
+              canGoNext={currentIndex < questions.length - 1}
+              isMobile={isMobile}
+            />
+          </div>
+        ) : (
+          <Card className="glass-card">
+            <CardContent className="py-8 text-center">
+              <HelpCircle className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+              <p className="text-muted-foreground">No practice questions available for this class yet.</p>
+              {!questionsOnly && (
+                <Button 
+                  onClick={toggleQuestionsOnlyMode}
+                  className="mt-4"
+                >
+                  Go to Full Class
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    );
+  }
+
+  // Normal Class Player View (when not in questionsOnly mode)
   return (
     <div className={`animate-fade-in flex flex-col ${viewMode === "video-only" ? "h-[calc(10vh-1rem)]" : "space-y-4"}`}>
       {/* Mobile Collapsed Navbar Indicator */}
@@ -238,6 +290,18 @@ const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide, questionsOnly =
 
             {/* Control Buttons */}
             <div className="flex items-center gap-2 flex-wrap">
+              {/* Toggle Questions Only Button */}
+              {hasQuestions && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={toggleQuestionsOnlyMode}
+                  className="gap-2"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">Questions Only</span>
+                </Button>
+              )}
 
               <Button
                 variant={viewMode === "video-only" ? "default" : "outline"}
