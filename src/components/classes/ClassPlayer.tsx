@@ -17,6 +17,7 @@ interface ClassPlayerProps {
   onBack: () => void;
   onMobileNavbarHide?: (hide: boolean) => void;
   mobileActionSlot?: React.ReactNode;
+   questionsOnly?: boolean;
 }
 
 type ViewMode = "video-questions" | "video-only" | "pdf";
