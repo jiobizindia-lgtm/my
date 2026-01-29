@@ -14,7 +14,7 @@ const Classes = () => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
   const [selectedSubtopic, setSelectedSubtopic] = useState<string | null>(null);
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
-  const [questionsOnly, setQuestionsOnly] = useState<boolean>(false); // New state
+  const [questionsOnly, setQuestionsOnly] = useState<boolean>(false);
   const { setHideNavbar } = useLayout();
 
   const currentSubtopics = selectedSubject ? getSubtopicsBySubject(selectedSubject) : [];
@@ -25,7 +25,7 @@ const Classes = () => {
     if (view === "player") { 
       setView("classes"); 
       setSelectedClass(null); 
-      setQuestionsOnly(false); // Reset questionsOnly when leaving player
+      setQuestionsOnly(false);
     }
     else if (view === "classes") { 
       setView("subtopics"); 
@@ -40,14 +40,13 @@ const Classes = () => {
   const handleBackFromPlayer = () => {
     setView("classes");
     setSelectedClass(null);
-    setQuestionsOnly(false); // Reset questionsOnly when leaving player
+    setQuestionsOnly(false);
   };
 
   const handleMobileNavbarHide = (hide: boolean) => {
     setHideNavbar(hide);
   };
 
-  // Function to handle class selection with questionsOnly option
   const handleClassSelect = (classId: string, questionsOnlyMode: boolean = false) => {
     setSelectedClass(classId);
     setQuestionsOnly(questionsOnlyMode);
@@ -144,19 +143,24 @@ const Classes = () => {
                 <img src={cls.thumbnail} alt={cls.title} className="w-full h-40 object-cover" />
                 <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent" />
                 
-                {/* Two play buttons - one for normal mode, one for questions only */}
+                {/* Play buttons - Conditionally show questions button if class has questions */}
                 <div className="absolute bottom-3 right-3 flex gap-2">
-                  <Button 
-                    size="icon" 
-                    className="rounded-full bg-secondary hover:bg-secondary/80"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleClassSelect(cls.id, true);
-                    }}
-                    title="Questions Only"
-                  >
-                    <span className="text-xs font-bold">Q</span>
-                  </Button>
+                  {/* Questions Only Button - Only show if class supports questions */}
+                  {cls.hasQuestions && (
+                    <Button 
+                      size="icon" 
+                      className="rounded-full bg-secondary hover:bg-secondary/80"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleClassSelect(cls.id, true);
+                      }}
+                      title="Questions Only"
+                    >
+                      <span className="text-xs font-bold">Q</span>
+                    </Button>
+                  )}
+                  
+                  {/* Normal Play Button */}
                   <Button 
                     size="icon" 
                     className="rounded-full gradient-primary"
@@ -164,6 +168,7 @@ const Classes = () => {
                       e.stopPropagation();
                       handleClassSelect(cls.id, false);
                     }}
+                    title="Watch Class"
                   >
                     <Play className="h-4 w-4" />
                   </Button>
@@ -182,7 +187,7 @@ const Classes = () => {
                   </span>
                 </div>
                 
-                {/* Optional: Show if class has questions */}
+                {/* Show if class has questions */}
                 {cls.hasQuestions && (
                   <div className="mt-3">
                     <Badge variant="outline" className="text-xs">
@@ -202,7 +207,7 @@ const Classes = () => {
           currentClass={currentClass} 
           onBack={handleBackFromPlayer}
           onMobileNavbarHide={handleMobileNavbarHide}
-          questionsOnly={questionsOnly} // Pass the questionsOnly prop
+          questionsOnly={questionsOnly}
         />
       )}
     </div>
