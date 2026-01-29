@@ -107,6 +107,51 @@ const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide }: ClassPlayerPr
     setIsNavbarCollapsed(!isNavbarCollapsed);
   };
 
+
+// In ClassPlayer component props
+interface ClassPlayerProps {
+  currentClass: ClassType;
+  onBack: () => void;
+  onMobileNavbarHide: (hide: boolean) => void;
+  questionsOnly?: boolean; // Add this
+}
+
+// Then inside your ClassPlayer component:
+const ClassPlayer = ({ currentClass, onBack, onMobileNavbarHide, questionsOnly = false }: ClassPlayerProps) => {
+  // ... existing code ...
+  
+  // You can use questionsOnly to conditionally render only the questions section
+  // For example:
+  const [showQuestionsOnly, setShowQuestionsOnly] = useState(questionsOnly);
+  
+  // ... rest of the component ...
+  
+  return (
+    <div className="class-player-container">
+      {/* You can add a toggle button to switch between normal view and questions only */}
+      {!questionsOnly && (
+        <Button onClick={() => setShowQuestionsOnly(!showQuestionsOnly)}>
+          {showQuestionsOnly ? "Show Full Class" : "Show Questions Only"}
+        </Button>
+      )}
+      
+      {showQuestionsOnly ? (
+        // Render only questions section
+        <div className="questions-only-view">
+          {/* Your questions component */}
+        </div>
+      ) : (
+        // Render normal class player
+        <div className="normal-class-view">
+          {/* Your existing class player UI */}
+        </div>
+      )}
+    </div>
+  );
+};
+
+  
+
   // PDF View
   if (viewMode === "pdf") {
     return (
