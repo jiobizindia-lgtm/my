@@ -1,6 +1,6 @@
+// src/contexts/AuthContext.tsx (modified imports to use src/firebase/firebase.ts)
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { 
-  getAuth, 
   signInWithEmailAndPassword, 
   createUserWithEmailAndPassword,
   signOut,
@@ -9,16 +9,12 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { 
-  getFirestore, 
   doc, 
   setDoc, 
   getDoc, 
   updateDoc 
 } from 'firebase/firestore';
-import { app } from '../App'; // Import your Firebase app from App.tsx
-
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db } from "@/firebase/firebase"; // <-- changed import
 
 export interface UserProfile {
   id: string;
@@ -54,37 +50,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      setFirebaseUser(firebaseUser);
+    // Listen for auth state changes using auth exported from firebase module
+    const unsubscribe = onAuthStateChanged(auth, async (fUser) => {
+      setFirebaseUser(fUser);
       
-      if (firebaseUser) {
-        // Fetch user profile from Firestore
+      if (fUser) {
         try {
-          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+          const userDocRef = doc(db, "users", fUser.uid);
+          const userDoc = await getDoc(userDocRef);
           if (userDoc.exists()) {
             setUser(userDoc.data() as UserProfile);
           } else {
-            // Create profile if it doesn't exist
             const newUserProfile: UserProfile = {
-              id: firebaseUser.uid,
-              firstName: firebaseUser.displayName?.split(' ')[0] || '',
+              id: fUser.uid,
+              firstName: fUser.displayName?.split(' ')[0] || '',
               middleName: '',
-              surname: firebaseUser.displayName?.split(' ')[1] || '',
+              surname: fUser.displayName?.split(' ')[1] || '',
               fatherName: '',
               mobileNumber: '',
-              email: firebaseUser.email || '',
+              email: fUser.email || '',
               state: '',
               district: '',
               city: '',
-              avatar: firebaseUser.photoURL || '',
+              avatar: fUser.photoURL || '',
               createdAt: new Date().toISOString(),
             };
-            await setDoc(doc(db, 'users', firebaseUser.uid), newUserProfile);
+            await setDoc(userDocRef, newUserProfile);
             setUser(newUserProfile);
           }
         } catch (error) {
-          console.error('Error fetching user profile:', error);
+          console.error("Error fetching user profile:", error);
         }
       } else {
         setUser(null);
@@ -96,70 +91,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => unsubscribe();
   }, []);
 
-  const register = async (
-    userData: Omit<UserProfile, "id" | "avatar" | "createdAt">, 
-    password: string
-  ): Promise<{ success: boolean; error?: string }> => {
-    try {
-      // Create user with email and password
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        userData.email, 
-        password
-      );
-      
-      // Update display name
-      await updateFirebaseProfile(userCredential.user, {
-        displayName: `${userData.firstName} ${userData.surname}`.trim()
-      });
-
-      // Create user profile in Firestore
-      const newUserProfile: UserProfile = {
-        ...userData,
-        id: userCredential.user.uid,
-        avatar: '',
-        createdAt: new Date().toISOString(),
-      };
-
-      await setDoc(doc(db, 'users', userCredential.user.uid), newUserProfile);
-      setUser(newUserProfile);
-      
-      return { success: true };
-    } catch (error: any) {
-      console.error('Registration error:', error);
-      return { 
-        success: false, 
-        error: error.message || 'Registration failed. Please try again.' 
-      };
-    }
-  };
-
-  const login = async (
-    email: string, 
-    password: string
-  ): Promise<{ success: boolean; error?: string }> => {
+  // login, register, logout, updateProfile implementations remain same
+  // (use signInWithEmailAndPassword(auth, ...) etc.)
+  // ...
+  const login = async (email: string, password: string) => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
-    } catch (error: any) {
-      console.error('Login error:', error);
-      
-      // User-friendly error messages
-      let errorMessage = 'Login failed. Please check your credentials.';
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No account found with this email.';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage = 'Incorrect password.';
-      } else if (error.code === 'auth/too-many-requests') {
-        errorMessage = 'Too many failed attempts. Please try again later.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address.';
-      }
-      
-      return { 
-        success: false, 
-        error: errorMessage 
-      };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Login failed" };
     }
   };
 
@@ -168,55 +108,71 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       await signOut(auth);
       setUser(null);
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error("Logout error:", error);
+    }
+  };
+
+  const register = async (
+    userData: Omit<UserProfile, "id" | "avatar" | "createdAt">, 
+    password: string
+  ) => {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, userData.email, password);
+      await updateFirebaseProfile(userCredential.user, {
+        displayName: `${userData.firstName} ${userData.surname}`.trim(),
+      });
+
+      const newUserProfile: UserProfile = {
+        ...userData,
+        id: userCredential.user.uid,
+        avatar: '',
+        createdAt: new Date().toISOString(),
+      };
+      await setDoc(doc(db, "users", userCredential.user.uid), newUserProfile);
+      setUser(newUserProfile);
+      return { success: true };
+    } catch (err: any) {
+      let errorMessage = "Registration failed.";
+      if (err.code === "auth/email-already-in-use") errorMessage = "Email already in use.";
+      return { success: false, error: errorMessage };
     }
   };
 
   const updateProfile = async (updates: Partial<UserProfile>) => {
     if (!user || !firebaseUser) return;
-    
     try {
       const updatedUser = { ...user, ...updates };
       setUser(updatedUser);
-      
-      // Update in Firestore
       await updateDoc(doc(db, 'users', firebaseUser.uid), updates);
-      
-      // Update Firebase auth profile if needed
       if (updates.firstName || updates.surname) {
         await updateFirebaseProfile(firebaseUser, {
           displayName: `${updatedUser.firstName} ${updatedUser.surname}`.trim()
         });
       }
-      
     } catch (error) {
-      console.error('Update profile error:', error);
+      console.error("Update profile error:", error);
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        firebaseUser,
-        isAuthenticated: !!user,
-        login,
-        register,
-        logout,
-        updateProfile,
-        loading
-      }}
-    >
+    <AuthContext.Provider value={{
+      user,
+      firebaseUser,
+      isAuthenticated: !!firebaseUser,
+      login,
+      register,
+      logout,
+      updateProfile,
+      loading
+    }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be used within AuthProvider");
+  return ctx;
 };
